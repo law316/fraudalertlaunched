@@ -1,14 +1,30 @@
-# Step 1: Use an official JDK image
-FROM eclipse-temurin:17-jdk
-
-# Step 2: Create app directory
+# Step 1: Build stage
+FROM eclipse-temurin:17-jdk AS builder
 WORKDIR /app
 
-# Step 3: Copy JAR file from root
-COPY FraudAlert-0.0.1-SNAPSHOT.jar app.jar
+# Copy Maven wrapper and project files
+COPY pom.xml .
+COPY mvnw .
+COPY .mvn .mvn
 
-# Step 4: Expose port 8080 (default for Spring Boot)
+# Download dependencies (helps with caching)
+RUN ./mvnw dependency:go-offline
+
+# Copy the entire source code
+COPY src src
+
+# Package the application without running tests
+RUN ./mvnw clean package -DskipTests
+
+# Step 2: Runtime stage
+FROM eclipse-temurin:17-jdk
+WORKDIR /app
+
+# Copy the built jar from the builder stage
+COPY --from=builder /app/target/*.jar app.jar
+
+# Expose the port (Render detects this)
 EXPOSE 8080
 
-# Step 5: Run the application
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+# Run the application
+ENTRYPOINT ["java", "-jar", "app.jar"]
