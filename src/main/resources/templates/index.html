@@ -3,7 +3,6 @@
 <head>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#008080">
-    <link rel="manifest" href="/manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fraud Alert - Secure Your Digital World</title>
@@ -35,24 +34,28 @@
             z-index: 1000;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
+
         header h1 {
             font-size: 1.8rem;
             font-weight: 700;
             color: #ff4444;
             letter-spacing: 1px;
         }
+
         nav a {
-            margin-left: 25px;
+            margin-left: 20px;
             text-decoration: none;
             color: #ddd;
             font-weight: 500;
+            font-size: 16px; /* default desktop size */
             transition: color 0.3s;
         }
+
         nav a:hover {
             color: #ff4444;
         }
 
-        /* Hero section */
+        /* --- Hero Section --- */
         .hero {
             height: 100vh;
             display: flex;
@@ -64,6 +67,7 @@
             background: url('https://images.unsplash.com/photo-1584433144859-1fc3ab64a957?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
             transition: background-image 1s ease-in-out;
         }
+
         .overlay {
             position: absolute;
             top: 0; left: 0;
@@ -71,6 +75,7 @@
             background: rgba(0, 0, 0, 0.6);
             z-index: 1;
         }
+
         .hero-content {
             position: relative;
             z-index: 2;
@@ -78,11 +83,13 @@
             animation: fadeInUp 1.5s ease;
             padding: 0 20px;
         }
+
         .hero-content h2 {
             font-size: 3rem;
             margin-bottom: 20px;
             color: #fff;
         }
+
         .hero-content p {
             font-size: 1.2rem;
             margin-bottom: 30px;
@@ -90,12 +97,13 @@
             line-height: 1.6;
         }
 
-        /* --- Search bar under hero text --- */
+        /* --- Search Bar --- */
         .search-bar {
             margin-top: 15px;
             position: relative;
             z-index: 2;
         }
+
         .search-bar input {
             width: 70%;
             padding: 14px 18px;
@@ -105,6 +113,7 @@
             font-size: 1rem;
             text-align: center;
         }
+
         .search-bar button {
             padding: 14px 28px;
             border: none;
@@ -115,6 +124,7 @@
             cursor: pointer;
             margin-left: 10px;
         }
+
         .search-bar button:hover {
             background: #cc1f1f;
         }
@@ -129,6 +139,7 @@
             transition: all 0.3s;
             box-shadow: 0 4px 10px rgba(255, 68, 68, 0.3);
         }
+
         .hero-content a:hover {
             background: #cc1f1f;
             transform: translateY(-3px);
@@ -147,21 +158,25 @@
             opacity: 0.4;
             animation: float 6s infinite ease-in-out;
         }
+
         @keyframes float {
             0%,100% { transform: translateY(0); }
             50% { transform: translateY(-30px); }
         }
 
+        /* About Section */
         .about {
             padding: 100px 60px;
             background: #21283a;
             text-align: center;
         }
+
         .about h3 {
             font-size: 2rem;
             color: #ff4444;
             margin-bottom: 20px;
         }
+
         .about p {
             max-width: 700px;
             margin: 0 auto;
@@ -169,6 +184,7 @@
             color: #bbb;
         }
 
+        /* Features */
         .features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -177,6 +193,7 @@
             background: #1a1f2c;
             text-align: center;
         }
+
         .feature-box {
             background: #262e43;
             border-radius: 10px;
@@ -185,37 +202,43 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             transition: transform 0.3s, box-shadow 0.3s;
         }
+
         .feature-box:hover {
             transform: translateY(-8px);
             box-shadow: 0 6px 16px rgba(0,0,0,0.25);
         }
+
         .feature-box h4 {
             font-size: 1.3rem;
             color: #ff4444;
             margin-bottom: 15px;
         }
 
-        /* --- AI Chat Section --- */
+        /* AI Chat Section */
         .ai-section {
             background: #21283a;
             text-align: center;
             padding: 80px 20px;
         }
+
         .ai-section h3 {
             color: #ff4444;
             font-size: 1.8rem;
             margin-bottom: 20px;
         }
+
         .ai-section p {
             color: #bbb;
             margin-bottom: 25px;
         }
+
         .ai-box {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 10px;
         }
+
         .ai-box input {
             width: 50%;
             padding: 14px;
@@ -224,6 +247,7 @@
             outline: none;
             font-size: 1rem;
         }
+
         .ai-box button {
             background: #ff4444;
             color: white;
@@ -233,20 +257,24 @@
             cursor: pointer;
             font-weight: 600;
         }
+
         .ai-box button:hover {
             background: #cc1f1f;
         }
 
+        /* CTA Section */
         .cta {
             text-align: center;
             padding: 100px 40px;
             background: #1a1f2c;
         }
+
         .cta h3 {
             font-size: 2rem;
             margin-bottom: 20px;
             color: #fff;
         }
+
         .cta a {
             background: #ff4444;
             color: white;
@@ -256,6 +284,7 @@
             text-decoration: none;
             transition: all 0.3s;
         }
+
         .cta a:hover {
             background: #cc1f1f;
             transform: translateY(-3px);
@@ -270,11 +299,40 @@
             border-top: 1px solid rgba(255,255,255,0.1);
         }
 
+        /* --- Responsive Styles --- */
         @media (max-width: 900px) {
-            .hero-content h2 { font-size: 2.2rem; }
-            .search-bar input { width: 90%; margin-bottom: 10px; }
-            .ai-box { flex-direction: column; }
-            .ai-box input { width: 90%; }
+            header {
+                padding: 15px 20px;
+            }
+            nav a {
+                margin-left: 10px;
+                font-size: 14px; /* smaller font on mobile */
+            }
+            .hero-content h2 {
+                font-size: 2.2rem;
+            }
+            .search-bar input {
+                width: 90%;
+                margin-bottom: 10px;
+            }
+            .ai-box {
+                flex-direction: column;
+            }
+            .ai-box input {
+                width: 90%;
+            }
+        }
+
+        @media (max-width: 500px) {
+            nav {
+                display: flex;
+                flex-wrap: wrap; /* allow links to wrap on very small screens */
+                justify-content: center;
+            }
+            nav a {
+                margin: 5px 8px;
+                font-size: 13px;
+            }
         }
     </style>
 </head>
@@ -287,7 +345,6 @@
         <a href="#about">About</a>
         <a href="#features">Features</a>
         <a href="/register">Register</a>
-
         <a href="login">Login</a>
     </nav>
 </header>
@@ -296,8 +353,7 @@
     <div class="overlay"></div>
     <div class="hero-content">
         <h2>Know Before You Engage</h2>
-        <p>Search for any product, brand, or company and see what others are saying before you trust them.</p>
-
+        <p>Register as a user and Search for any product, brand, or company and see what others are saying before you trust them.</p>
         <div class="search-bar">
             <input type="text" placeholder="Find out about a product, brand, or company...">
             <button>Search</button>
@@ -312,9 +368,7 @@
 
 <section class="about" id="about">
     <h3>About Fraud Alert</h3>
-    <p>Fraud Alert is your digital ally for spotting fake brands, unsafe sellers, and risky transactions. By sharing real experiences, users help others avoid scams and make smarter choices. To post, simply register and log in. If you just want to check before you buy, use the search bar to read others' experiences or ask our AI. It's all about staying safe, knowing what to expect, and helping each other make better decisions online.
-
-    </p>
+    <p>Fraud Alert is your digital ally for spotting fake brands, unsafe sellers, and risky transactions. By sharing real experiences, users help others avoid scams and make smarter choices. To post, simply register and log in. If you just want to check before you buy, use the search bar to read others' experiences or ask our AI. It's all about staying safe, knowing what to expect, and helping each other make better decisions online.</p>
 </section>
 
 <section class="features" id="features">
@@ -338,46 +392,21 @@
 
 <section class="ai-section">
     <h3>Ask FraudAlert AI</h3>
-    <p>Ask anything about a brand, company, or product — powered by AI insights.</p>
+    <p>Ask anything about a brand, company, or product — powered by AI insights to Access this feature register first.</p>
     <div class="ai-box">
-        <input type="text" placeholder="Ask our AI assistant about any company or product...">
-        <button>Ask AI</button>
+        <input type="text" placeholder="Register to Ask our AI assistant about any company or product...">
+        <button onclick="fetch('/register')">Ask AI</button>
     </div>
 </section>
 
 <section class="cta" id="cta">
-    <h3>Be Smarter. Stay Safer. Protect Your Digital Life.</h3>
-    <a href="#">Activate Protection</a>
+    <h3>Be Smarter. Stay Safer. Protect Your Digital Life.Register now and begin</h3>
+    <a href="#" onclick="fetch('/register')">Activate Protection</a>
 </section>
 
 <footer>
     <p>&copy; 2025 Fraud Alert. All rights reserved.</p>
 </footer>
-
-<script>
-    const hero = document.querySelector('.hero');
-    const images = [
-        'https://images.unsplash.com/photo-1584433144859-1fc3ab64a957?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80'
-    ];
-    let i = 0;
-    function changeBG() {
-        hero.style.backgroundImage = `url(${images[i]})`;
-        i = (i + 1) % images.length;
-    }
-    changeBG();
-    setInterval(changeBG, 6000);
-</script>
-<script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(reg => console.log('✅ Service Worker registered:', reg.scope))
-                .catch(err => console.error('❌ Service Worker registration failed:', err));
-        });
-    }
-</script>
 
 </body>
 </html>
