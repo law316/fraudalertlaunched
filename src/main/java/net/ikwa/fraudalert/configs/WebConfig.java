@@ -17,7 +17,7 @@ public class WebConfig {
 
         // ✅ Allowed origins (fixed spacing + removed trailing slash)
         config.setAllowedOrigins(Arrays.asList(
-                "https://fraudalert-spring-frog-2431.fly.dev",
+                "https://fraudalertlaunched.onrender.com",
                 "http://localhost:8080"
         ));
 
