@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Fraud Alert Posts</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+    <style>
+        body { font-family: "Raleway", sans-serif; background: #f8f9fa; }
+        .post-card { border-radius: 10px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; overflow: hidden; transition: transform 0.2s ease-in-out; }
+        .post-card:hover { transform: translateY(-5px); }
+        .post-img { width: 100%; height: 250px; object-fit: cover; background: #eee; }
+        .post-body { padding: 16px; }
+        .remark-positive { color: green; font-weight: bold; }
+        .remark-negative { color: red; font-weight: bold; }
+        .search-container { margin: 20px auto; max-width: 600px; display: flex; justify-content: center; align-items: center; }
+        .search-input { width: 80%; padding: 10px 15px; border: 1px solid #ccc; border-radius: 5px 0 0 5px; outline: none; }
+        .search-btn { background-color: teal; color: white; border: none; padding: 10px 15px; border-radius: 0 5px 5px 0; cursor: pointer; }
+        .search-btn:hover { background-color: #006666; }
+        .poster-info { font-size: 13px; color: gray; margin-top: 4px; }
+        .comment-section { margin-top: 10px; background: #fafafa; border-radius: 6px; padding: 8px; }
+        .comment-input input, .comment-input textarea { border: 1px solid #ccc; border-radius: 5px; padding: 6px; font-size: 14px; width: 100%; }
+        .comment-input button { align-self: flex-start; background-color: teal; color: white; border: none; border-radius: 5px; padding: 6px 12px; cursor: pointer; font-size: 13px; }
+        .comment-input button:hover { background-color: #006666; }
+    </style>
+</head>
+<body>
+
+<header class="w3-container w3-teal w3-center w3-padding-32">
+    <h2><i class="fa fa-bullhorn"></i> Fraud Alert Posts</h2>
+    <p>Explore what others are saying about different products, brands, and vendors.</p>
+</header>
+
+<div class="search-container">
+    <input type="text" id="searchInput" class="search-input" placeholder="Search product, brand or vendor...">
+    <button class="search-btn" onclick="fetchPosts()"><i class="fa fa-search"></i></button>
+</div>
+
+<div id="postsContainer" class="w3-content w3-padding"></div>
+
+<script>
+    const API_BASE_URL = "https://fraudalert-spring-frog-2431.fly.dev";
+
+    const POSTS_URL = `${API_BASE_URL}/api/madeposts`;      // posts endpoint
+    const COMMENTS_URL = `${API_BASE_URL}/api/comments`;    // comments endpoint
+    const CHATS_URL = `${API_BASE_URL}/api/chats`;          // chats endpoint if needed elsewhere
+
+    // Fetch all or filtered posts
+    async function fetchPosts() {
+        const searchQuery = document.getElementById("searchInput").value.trim();
+        const url = searchQuery ? `${POSTS_URL}?search=${encodeURIComponent(searchQuery)}` : POSTS_URL;
+
+        try {
+            const response = await fetch(url);
+            const postsContainer = document.getElementById("postsContainer");
+            postsContainer.innerHTML = "";
+
+            if (!response.ok) {
+                postsContainer.innerHTML = "<p class='w3-center w3-text-grey'>No posts found.</p>";
+                return;
+            }
+
+            const posts = await response.json();
+            if (!posts.length) {
+                postsContainer.innerHTML = "<p class='w3-center w3-text-grey'>No posts found.</p>";
+                return;
+            }
+
+            posts.forEach(post => {
+                const card = document.createElement("div");
+                card.classList.add("post-card", "w3-animate-opacity");
+
+                card.innerHTML = `
+                ${post.imageUrl ? `<img src="${post.imageUrl}" alt="${post.subjectName}" class="post-img">`
+                    : `<div class="post-img w3-center w3-padding-64"><i class="fa fa-image w3-text-grey w3-xxlarge"></i></div>`}
+
+                <div class="post-body">
+                    <h4 class="w3-text-teal">${post.subjectName}</h4>
+                    <p><b>Category:</b> ${post.reportCategory}</p>
+                    <p>${post.message}</p>
+                    <p class="poster-info">
+                        <i class="fa fa-user"></i> ${post.posterName} |
+                        <span class="${post.remarkType === 'Positive' ? 'remark-positive' : 'remark-negative'}">${post.remarkType}</span>
+                    </p>
+
+                    ${post.videoUrl ? `<video controls width="100%" style="margin-top:10px;border-radius:8px;">
+                        <source src="${post.videoUrl}" type="video/mp4">
+                    </video>` : ""}
+
+                    <div class="w3-margin-top">
+                        <button class="w3-button w3-small w3-teal" onclick="toggleComments('${post.id}')">💬 View Comments</button>
+                        <button class="w3-button w3-small w3-light-grey" onclick="toggleCommentForm('${post.id}')">✏️ Leave a Comment</button>
+
+                        <div class="comment-section w3-hide w3-padding-small w3-border-top" data-post-id="${post.id}">
+                            <p class="w3-text-grey">Loading comments...</p>
+                        </div>
+
+                        <div id="commentForm-${post.id}" class="w3-hide w3-padding-small w3-border-top">
+                            <input id="name-${post.id}" class="w3-input w3-border w3-margin-bottom" placeholder="Your name">
+                            <textarea id="text-${post.id}" class="w3-input w3-border" placeholder="Write your comment..."></textarea>
+                            <button class="w3-button w3-teal w3-margin-top" onclick="submitComment('${post.id}')">Post</button>
+                        </div>
+                    </div>
+                </div>
+                `;
+                postsContainer.appendChild(card);
+            });
+        } catch (err) {
+            console.error(err);
+            document.getElementById("postsContainer").innerHTML = "<p class='w3-center w3-text-grey'>Error loading posts.</p>";
+        }
+    }
+
+    async function toggleComments(postId) {
+        const commentsContainer = document.querySelector(`[data-post-id='${postId}']`);
+        if (commentsContainer.classList.contains("w3-hide")) {
+            commentsContainer.classList.remove("w3-hide");
+            await fetchComments(postId);
+        } else {
+            commentsContainer.classList.add("w3-hide");
+        }
+    }
+
+    function toggleCommentForm(postId) {
+        document.getElementById(`commentForm-${postId}`).classList.toggle("w3-hide");
+    }
+
+    async function fetchComments(postId) {
+        const response = await fetch(`${COMMENTS_URL}/${postId}`);
+        const commentsContainer = document.querySelector(`[data-post-id='${postId}']`);
+        commentsContainer.innerHTML = "";
+
+        if (response.ok) {
+            const comments = await response.json();
+            comments.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+            if (!comments.length) {
+                commentsContainer.innerHTML = "<p class='w3-text-grey'>No comments yet.</p>";
+                return;
+            }
+            comments.forEach(comment => {
+                const date = new Date(comment.createdAt || Date.now());
+                const formattedDate = !isNaN(date) ? date.toLocaleString() : "Unknown date";
+                const commenter = comment.commenterName?.trim() || "Anonymous";
+                const div = document.createElement("div");
+                div.classList.add("w3-padding-small","w3-border-bottom");
+                div.innerHTML = `<p><strong>${commenter}:</strong> ${comment.commentText}</p><small class="w3-text-grey">${formattedDate}</small>`;
+                commentsContainer.appendChild(div);
+            });
+        } else {
+            commentsContainer.innerHTML = "<p class='w3-text-grey'>Error loading comments.</p>";
+        }
+    }
+
+    async function submitComment(postId) {
+        const name = document.getElementById(`name-${postId}`).value.trim();
+        const comment = document.getElementById(`text-${postId}`).value.trim();
+        const commentsContainer = document.querySelector(`[data-post-id='${postId}']`);
+
+        if (!name || !comment) {
+            alert("Both name and comment are required.");
+            return;
+        }
+
+        const response = await fetch(COMMENTS_URL, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({postId, commenterName:name, commentText:comment})
+        });
+
+        if (response.ok) {
+            const savedComment = await response.json();
+            const date = new Date(savedComment.createdAt || Date.now());
+            const formattedDate = date.toLocaleString();
+            const div = document.createElement("div");
+            div.classList.add("w3-padding-small","w3-border-bottom");
+            div.innerHTML = `<p><strong>${savedComment.commenterName}:</strong> ${savedComment.commentText}</p><small class="w3-text-grey">${formattedDate}</small>`;
+            commentsContainer.prepend(div);
+            document.getElementById(`name-${postId}`).value="";
+            document.getElementById(`text-${postId}`).value="";
+            alert("Comment added!");
+        } else {
+            alert("Failed to save comment.");
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", fetchPosts);
+</script>
+
+</body>
+</html>

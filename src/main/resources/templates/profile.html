@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fraud Alert - User Profile</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <style>
+        body,h1,h2,h3,h4,h5,h6 {font-family:"Raleway", sans-serif;}
+        .w3-sidebar img {border-radius:50%;}
+        .post-box {background:#fff;padding:18px;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,0.05);}
+        .preview, .video-preview {margin-top:10px;max-width:100%;border-radius:6px;display:block;}
+        .hidden-file {display:none;}
+        .upload-btn {margin-right:8px;}
+        small.hint {color:#777;font-size:12px;}
+        .remark-options label {margin-right:15px;}
+
+        /* ---------- AI CHAT WIDGET STYLES (WhatsApp-style floating, matches site colors) ---------- */
+        #aiChatBtn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 65px;
+            height: 65px;
+            font-size: 20px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+            cursor: pointer;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.18s ease;
+        }
+        #aiChatBtn:hover { transform: scale(1.08); }
+
+        #aiChatBox {
+            display: none;
+            position: fixed;
+            bottom: 95px;
+            right: 25px;
+            width: 360px;
+            max-width: calc(100% - 50px);
+            height: 490px;
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            overflow: hidden;
+            flex-direction: column;
+            z-index: 10000;
+            display:flex;
+            transition: transform 0.22s ease, opacity 0.22s ease;
+        }
+        #aiChatBox.minimized {
+            height: 60px;
+            width: 260px;
+            align-items: center;
+            padding: 0;
+        }
+
+        #aiChatHeader {
+            background-color: #00796b;
+            color: white;
+            padding: 12px 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        #aiChatHeader small { font-weight: normal; opacity: .95; font-size:13px; margin-left:8px; }
+
+        #aiMessages {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            background: #f7f7f7;
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+        }
+        .msg {
+            margin: 0;
+            max-width: 78%;
+            padding: 8px 10px;
+            border-radius: 10px;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height:1.35;
+        }
+        .user-msg { background: #dcf8e8; align-self: flex-end; margin-left: auto; }
+        .ai-msg { background: #fff; border: 1px solid #e6e6e6; align-self: flex-start; }
+        .msg img { max-width: 200px; border-radius:6px; display:block; margin-top:6px; }
+
+        #aiInputArea {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-top: 1px solid #eee;
+            background: white;
+        }
+        #aiInput { flex: 1; border: none; outline: none; padding: 10px; font-size: 14px; background: #fafafa; border-radius: 8px;}
+        #aiSendBtn {
+            background-color: #00796b; color: white; border: none; padding: 8px 12px;
+            border-radius: 8px; cursor: pointer; margin-left:8px;
+        }
+        #aiSendBtn:hover { background-color: #00695c; }
+        #aiImageUpload { display:none; }
+        #aiUploadLabel { cursor:pointer; color:#00796b; font-size:20px; margin-right:8px; display:flex; align-items:center; }
+
+        /* small responsive tweak */
+        @media (max-width:420px) {
+            #aiChatBox { width: 92%; right: 4%; bottom: 80px; height: 60vh; }
+        }
+
+        /* ensure attachment preview area doesn't overflow layout */
+        #attachmentPreview img { max-width: 100%; height: auto; border-radius:6px; display:block; }
+        #attachmentPreview video { max-width: 100%; height: auto; border-radius:6px; display:block; }
+
+        /* subtle scrollbar styling for the chat */
+        #aiMessages::-webkit-scrollbar { width:8px; }
+        #aiMessages::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius:6px; }
+
+        /* modal styles for URL input */
+        .url-modal-backdrop {
+            position: fixed;
+            left:0; top:0; right:0; bottom:0;
+            background: rgba(0,0,0,0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 20000;
+        }
+        .url-modal {
+            background: #fff;
+            width: 420px;
+            max-width: calc(100% - 40px);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.28);
+        }
+        .url-modal h3 { margin-top:0; margin-bottom:8px; font-size:18px; }
+        .url-modal .hint { display:block; font-size:13px; color:#555; margin-bottom:8px; }
+        .url-modal .actions { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
+        .url-modal input[type="url"] { width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; box-sizing:border-box; }
+    </style>
+</head>
+<body class="w3-light-grey w3-content" style="max-width:1600px">
+
+<!-- Sidebar -->
+<nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
+    <div class="w3-container w3-center">
+
+
+        <h4><b>PROFILE</b></h4>
+        <p class="w3-text-grey">You’re completely anonymous — feel free to share your honest experience, whether good or bad.
+            Help others make better decisions and promote trusted businesses.
+            Be clear, be real, and let’s fight fraud while celebrating honesty.</p>
+
+
+    </div>
+
+
+
+    <!-- About (kept intact) -->
+    <div class="w3-container w3-padding-small">
+        <h5><b>About</b></h5>
+        <p style="font-size:13px; line-height:1.45;">
+            Fraud Alert is your digital ally for spotting fake brands, unsafe sellers, and risky transactions.
+            By sharing real experiences, users help others avoid scams and make smarter choices.
+            To post, simply register and log in. Use the search bar to read others' experiences or ask our AI.
+        </p>
+    </div>
+
+    <div class="w3-bar-block">
+        <a href="#postForm" onclick="scrollToPost(); w3_close();" class="w3-bar-item w3-button w3-padding w3-text-teal">
+            <i class="fa fa-pencil-square-o fa-fw w3-margin-right"></i>MAKE A POST
+        </a>
+    </div>
+
+    <div class="w3-container w3-padding">
+        <input class="w3-input w3-border" type="text" placeholder="Search..." style="margin-top:5px;">
+    </div>
+
+    <div class="w3-panel w3-large w3-center">
+        <i class="fa fa-facebook-official w3-hover-opacity"></i>
+        <i class="fa fa-instagram w3-hover-opacity"></i>
+        <i class="fa fa-twitter w3-hover-opacity"></i>
+        <i class="fa fa-linkedin w3-hover-opacity"></i>
+    </div>
+</nav>
+
+<!-- Overlay -->
+<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" id="myOverlay"></div>
+
+<!-- Main -->
+<div class="w3-main" style="margin-left:300px">
+
+    <!-- Header -->
+    <header id="portfolio">
+        <a href="#"><img src="https://i.pravatar.cc/100?img=11" style="width:65px;"
+                         class="w3-circle w3-right w3-margin w3-hide-large w3-hover-opacity" alt="User"></a>
+        <span class="w3-button w3-hide-large w3-xxlarge w3-hover-text-grey" onclick="w3_open()">
+      <i class="fa fa-bars"></i></span>
+        <div class="w3-container">
+            <h1><b>Fraud Alert</b></h1>
+            <div class="w3-section w3-bottombar w3-padding-16">
+                <span class="w3-margin-right">Categories:</span>
+                <button class="w3-button w3-black" onclick="window.location.href='seepost'">
+                    All Posts
+                </button>
+
+
+                <button class="w3-button w3-black" onclick="window.location.href='seepost'">
+                    Product Reviews
+                </button>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- Post Grid (three posts kept) -->
+    <div class="w3-row-padding">
+        <div class="w3-third w3-container w3-margin-bottom">
+            <img src="https://fastly.picsum.photos/id/1025/1200/800.jpg?hmac=h0OQ1VLKTkk5MHLKv5Wi_bADWP-hPutr8qcGjdRrmYQ" alt="Product" style="width:100%" class="w3-hover-opacity">
+            <div class="w3-container w3-white">
+                <p><b>Fake Store Experience</b></p>
+                <p>Be cautious of websites offering unrealistic discounts. I ordered an item that never arrived. Their contact email was fake.</p>
+            </div>
+        </div>
+        <div class="w3-third w3-container w3-margin-bottom">
+            <img src="https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?auto=format&fit=crop&w=1200&q=80" alt="Review" style="width:100%" class="w3-hover-opacity">
+            <div class="w3-container w3-white">
+                <p><b>Honest Seller</b></p>
+                <p>Had a great experience with this verified brand. Fast delivery and authentic product — definitely recommend!</p>
+            </div>
+        </div>
+        <div class="w3-third w3-container">
+            <img src="https://fastly.picsum.photos/id/1035/1200/800.jpg?hmac=d9WXvnpXNEpaS8ePPrW4Gb4Sf2jRvzxm5Ufjn8CXcQU" alt="Scam Alert" style="width:100%" class="w3-hover-opacity">
+            <div class="w3-container w3-white">
+                <p><b>Fraudulent WhatsApp Vendor</b></p>
+                <p>This vendor demanded payment before delivery and disappeared. Always verify sellers before sending money.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post Form -->
+    <div class="w3-container w3-padding-large w3-light-grey" id="postForm">
+        <h4><b>Make a Post</b></h4>
+        <p>Share your experience about a product, brand, or seller. Help others stay safe online.</p>
+
+        <div class="post-box">
+            <form id="postFormElement" onsubmit="return handlePostSubmit(event)">
+                <div class="w3-section">
+                    <label><b>Report Category</b></label>
+                    <select class="w3-select w3-border" id="reportCategory" required>
+                        <option value="" disabled selected>Choose category</option>
+                        <option>Product</option>
+                        <option>Service</option>
+                        <option>Brand</option>
+                        <option>Vendor</option>
+                        <option>Freelancer</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="w3-section">
+                    <label><b>Item / Brand / Vendor / Freelancer Name</b></label>
+                    <input class="w3-input w3-border" type="text" id="subjectName" placeholder="Enter exact name" required>
+                    <small class="hint">Use exact words so others can find it easily (e.g. Eastman Solar Battery, Oppo Reno 11)</small>
+                </div>
+
+                <div class="w3-section">
+                    <label><b>Name</b></label>
+                    <input class="w3-input w3-border" type="text" id="posterName" placeholder="Your name" required>
+                </div>
+
+                <div class="w3-section">
+                    <label><b>Remark Type</b></label><br>
+                    <div class="remark-options">
+                        <label><input class="w3-radio" type="radio" name="remark" value="Positive" required> Positive</label>
+                        <label><input class="w3-radio" type="radio" name="remark" value="Negative"> Negative</label>
+                    </div>
+                </div>
+
+                <div class="w3-section">
+                    <label><b>Message</b></label>
+                    <textarea class="w3-input w3-border" rows="5" id="posterMessage" placeholder="Type your experience here..." required></textarea>
+                </div>
+
+                <div class="w3-section">
+                    <!-- Buttons open modal to paste URL -->
+                    <button type="button" class="w3-button w3-teal upload-btn" onclick="openUrlModal('image')">
+                        <i class="fa fa-image w3-margin-right"></i>Upload Image (URL)
+                    </button>
+                    <button type="button" class="w3-button w3-teal upload-btn" onclick="openUrlModal('video')">
+                        <i class="fa fa-video-camera w3-margin-right"></i>Upload Video (URL)
+                    </button>
+
+                    <!-- Hidden file inputs left intact (not used) - keep them for future use -->
+                    <input type="file" id="imageUpload" accept="image/*" class="hidden-file">
+                    <input type="file" id="videoUpload" accept="video/*" class="hidden-file">
+
+                    <!-- Attachment preview area (shows image or video from URL) -->
+                    <div id="attachmentPreview"></div>
+                </div>
+
+                <button type="submit" class="w3-button w3-teal w3-margin-bottom">
+                    <i class="fa fa-send w3-margin-right"></i>Send
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w3-container w3-padding-32 w3-dark-grey">
+        <div class="w3-row-padding">
+            <div class="w3-third">
+                <h3>FRAUD ALERT</h3>
+                <p>Fraud Alert is your digital ally for spotting fake brands, unsafe sellers, and risky transactions. Together, we make the internet safer.</p>
+            </div>
+            <div class="w3-third">
+                <h3>RECENT POSTS</h3>
+                <ul class="w3-ul w3-hoverable">
+                    <li class="w3-padding-16">
+                        <img src="https://images.unsplash.com/photo-1581090700227-3e09c8a67a64?auto=format&fit=crop&w=60&q=60" class="w3-left w3-margin-right w3-round" style="width:50px">
+                        <span class="w3-large">Instagram Scam</span><br>
+                        <span>Stay away from fake giveaways.</span>
+                    </li>
+                    <li class="w3-padding-16">
+                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=60&q=60" class="w3-left w3-margin-right w3-round" style="width:50px">
+                        <span class="w3-large">Fake Brand Alert</span><br>
+                        <span>Another cloned e-commerce site exposed.</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="w3-third">
+                <h3>POPULAR TAGS</h3>
+                <p>
+                    <span class="w3-tag w3-black w3-margin-bottom">Scam</span>
+                    <span class="w3-tag w3-grey w3-small w3-margin-bottom">Online Safety</span>
+                    <span class="w3-tag w3-grey w3-small w3-margin-bottom">Reviews</span>
+                    <span class="w3-tag w3-grey w3-small w3-margin-bottom">Vendors</span>
+                    <span class="w3-tag w3-grey w3-small w3-margin-bottom">Products</span>
+                    <span class="w3-tag w3-grey w3-small w3-margin-bottom">Awareness</span>
+                    <span class="w3-tag w3-grey w3-small w3-margin-bottom">Security</span>
+                </p>
+            </div>
+        </div>
+        <div class="w3-center w3-padding-16">
+            <i class="fa fa-facebook-official w3-hover-opacity"></i>
+            <i class="fa fa-instagram w3-hover-opacity"></i>
+            <i class="fa fa-twitter w3-hover-opacity"></i>
+            <i class="fa fa-linkedin w3-hover-opacity"></i>
+        </div>
+    </footer>
+
+    <div class="w3-black w3-center w3-padding-24">&copy; 2025 Fraud Alert. All rights reserved.</div>
+</div>
+
+<!-- ===================== AI CHAT WIDGET (Floating) ===================== -->
+<button id="aiChatBtn" title="Ask the AI"><i class="fa fa-comments"></i></button>
+
+<div id="aiChatBox" aria-hidden="true" role="dialog" aria-label="AI chat" >
+    <div id="aiChatHeader">
+        <div>
+            Ask AI Anything <small style="margin-left:8px; font-weight:400;">(type or upload an image)</small>
+        </div>
+        <div style="display:flex; align-items:center;">
+            <span id="aiMinBtn" title="Minimize" style="cursor:pointer; margin-right:10px; opacity:0.95;"><i class="fa fa-minus" style="color:white;"></i></span>
+            <span id="aiCloseBtn" title="Close" style="cursor:pointer; font-size:18px;">&times;</span>
+        </div>
+    </div>
+
+    <div id="aiMessages" aria-live="polite" style="padding:10px; overflow-y:auto;"></div>
+
+    <div id="aiInputArea">
+        <label for="aiImageUpload" id="aiUploadLabel" title="Upload image"><i class="fa fa-image"></i></label>
+        <input type="file" id="aiImageUpload" accept="image/*">
+        <input id="aiInput" type="text" placeholder="Type a message..." aria-label="Type a message" style="margin-left:6px;">
+        <button id="aiSendBtn" title="Send" style="margin-left:8px;"><i class="fa fa-paper-plane"></i></button>
+    </div>
+</div>
+
+<!-- URL Modal for image/video -->
+<div id="urlModalBackdrop" class="url-modal-backdrop" role="dialog" aria-hidden="true">
+    <div class="url-modal" role="document" aria-labelledby="urlModalTitle">
+        <h3 id="urlModalTitle">Add Media URL</h3>
+        <p class="hint">Paste a direct image or video URL (example: <code>https://i.postimg.cc/XYZ123/sample.jpg</code>)</p>
+        <label for="urlInput">Media URL</label>
+        <input id="urlInput" type="url" placeholder="https://i.postimg.cc/..." />
+        <p class="hint" style="margin-top:8px;">
+            If you don't have a URL, upload your image/video to
+            <a href="https://postimages.org/" target="_blank" rel="noopener" style="color:#009688;">postimages.org</a>
+            then paste the generated link here.
+        </p>
+        <div class="actions">
+            <button class="w3-button" id="urlCancelBtn">Cancel</button>
+            <button class="w3-button w3-teal" id="urlUseBtn">Use URL</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ========== PATHS / CONFIG ==========
+    const API_BASE_URL = "https://fraudalert-spring-frog-2431.fly.dev";
+
+    const POST_URL = `${API_BASE_URL}/api/post`;      // endpoint for posts
+    const API_URL  = `${API_BASE_URL}/api/chats`;     // endpoint for chats
+    // AI endpoint (unchanged)
+
+    // ========== Sidebar helpers ==========
+    function w3_open() {
+        document.getElementById("mySidebar").style.display = "block";
+        document.getElementById("myOverlay").style.display = "block";
+    }
+
+    function w3_close() {
+        document.getElementById("mySidebar").style.display = "none";
+        document.getElementById("myOverlay").style.display = "none";
+    }
+
+    function scrollToPost() {
+        const el = document.getElementById('postForm');
+        if (el) el.scrollIntoView({behavior: 'smooth', block: 'start'});
+    }
+
+    // ========== URL modal logic ==========
+    let currentMediaType = null; // 'image' or 'video'
+    let imageUrlValue = ''; // stored URL for submission
+    let videoUrlValue = ''; // stored URL for submission
+
+    const urlBackdrop = document.getElementById('urlModalBackdrop');
+    const urlInput = document.getElementById('urlInput');
+    const urlUseBtn = document.getElementById('urlUseBtn');
+    const urlCancelBtn = document.getElementById('urlCancelBtn');
+    const attachmentPreview = document.getElementById('attachmentPreview');
+
+    function openUrlModal(type) {
+        currentMediaType = type; // "image" or "video"
+        urlInput.value = (type === 'image' ? imageUrlValue : videoUrlValue) || '';
+        urlBackdrop.style.display = 'flex';
+        urlBackdrop.setAttribute('aria-hidden', 'false');
+        urlInput.focus();
+    }
+
+    function closeUrlModal() {
+        urlBackdrop.style.display = 'none';
+        urlBackdrop.setAttribute('aria-hidden', 'true');
+        currentMediaType = null;
+        urlInput.value = '';
+    }
+
+    urlCancelBtn.addEventListener('click', closeUrlModal);
+    urlBackdrop.addEventListener('click', (e) => {
+        if (e.target === urlBackdrop) closeUrlModal();
+    });
+
+    // Validate a URL string (basic)
+    function isValidUrl(s) {
+        try {
+            const u = new URL(s);
+            return u.protocol === 'http:' || u.protocol === 'https:';
+        } catch (err) {
+            return false;
+        }
+    }
+
+    // Use URL button pressed
+    urlUseBtn.addEventListener('click', () => {
+        const val = urlInput.value.trim();
+        if (!val) {
+            alert('Please paste a valid URL or Cancel.');
+            return;
+        }
+        if (!isValidUrl(val)) {
+            alert('Please enter a valid http/https URL.');
+            return;
+        }
+
+        if (currentMediaType === 'image') {
+            imageUrlValue = val;
+            showAttachmentPreview('image', val);
+        } else if (currentMediaType === 'video') {
+            videoUrlValue = val;
+            showAttachmentPreview('video', val);
+        }
+        closeUrlModal();
+    });
+
+    // Show preview for image or video (from URL)
+    function showAttachmentPreview(type, url) {
+        // Keep both previews but prefer to show image first if both present
+        // Clear preview area and rebuild
+        attachmentPreview.innerHTML = '';
+
+        if (imageUrlValue) {
+            const img = document.createElement('img');
+            img.src = imageUrlValue;
+            img.alt = 'Attached image preview';
+            img.className = 'preview';
+            attachmentPreview.appendChild(img);
+        }
+
+        if (videoUrlValue) {
+            // if it's a YouTube link, show embedded iframe; else try <video>
+            if (videoUrlValue.includes('youtube.com') || videoUrlValue.includes('youtu.be')) {
+                const iframe = document.createElement('iframe');
+                iframe.width = '100%';
+                iframe.height = '220';
+                iframe.setAttribute('frameborder', '0');
+                iframe.setAttribute('allowfullscreen', '');
+                // convert youtu.be short links to embed URL
+                let embed = videoUrlValue;
+                if (videoUrlValue.includes('youtu.be')) {
+                    const id = videoUrlValue.split('youtu.be/')[1].split(/[?&]/)[0];
+                    embed = 'https://www.youtube.com/embed/' + id;
+                } else if (videoUrlValue.includes('watch?v=')) {
+                    const id = new URL(videoUrlValue).searchParams.get('v');
+                    embed = 'https://www.youtube.com/embed/' + id;
+                }
+                iframe.src = embed;
+                attachmentPreview.appendChild(iframe);
+            } else {
+                const vid = document.createElement('video');
+                vid.src = videoUrlValue;
+                vid.controls = true;
+                vid.className = 'video-preview';
+                attachmentPreview.appendChild(vid);
+            }
+        }
+    }
+
+    // ========== Form submit (send JSON) ==========
+    async function handlePostSubmit(event) {
+        event.preventDefault();
+
+        // gather fields
+        const reportCategory = document.getElementById('reportCategory').value;
+        const subjectName = document.getElementById('subjectName').value.trim();
+        const posterName = document.getElementById('posterName').value.trim();
+        const remark = document.querySelector('input[name="remark"]:checked');
+        const remarkType = remark ? remark.value : '';
+        const message = document.getElementById('posterMessage').value.trim();
+
+        // basic validation
+        if (!reportCategory || !subjectName || !posterName || !remarkType || !message) {
+            alert('Please fill all required fields.');
+            return;
+        }
+
+        // build payload as JSON (imageUrl/videoUrl optional)
+        const payload = {
+            reportCategory,
+            subjectName,
+            posterName,
+            remarkType,
+            message,
+            imageUrl: imageUrlValue || null,
+            videoUrl: videoUrlValue || null
+        };
+
+        try {
+            const res = await fetch(POST_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                const text = await res.text().catch(()=>null);
+                alert('✅ Post submitted successfully!');
+                // reset form
+                document.getElementById('postFormElement').reset();
+                imageUrlValue = '';
+                videoUrlValue = '';
+                attachmentPreview.innerHTML = '';
+            } else {
+                const err = await res.text();
+                alert('❌ Failed to submit post: ' + (err || res.status));
+            }
+        } catch (err) {
+            console.error('Submit error:', err);
+            alert('❌ Error submitting post. See console for details.');
+        }
+    }
+
+    // ========== Keep hidden file inputs handlers (unchanged) ==========
+    // They are not used for upload, but keep preview support if users pick a file locally (for convenience)
+    const imageUploadEl = document.getElementById('imageUpload');
+    const videoUploadEl = document.getElementById('videoUpload');
+
+    if (imageUploadEl) imageUploadEl.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        // create local preview but do not upload file to backend (we keep URL-only behavior)
+        const url = URL.createObjectURL(file);
+        imageUrlValue = ''; // clear URL because user used local file; user is instructed to use URL only
+        attachmentPreview.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = 'preview';
+        attachmentPreview.appendChild(img);
+        // show hint that user should convert to URL if they want to submit
+        const note = document.createElement('small');
+        note.className = 'hint';
+        note.textContent = 'Local preview only — to submit, please upload the image to postimages.org and paste the image URL using the Upload Image (URL) button.';
+        attachmentPreview.appendChild(note);
+    });
+
+    if (videoUploadEl) videoUploadEl.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        videoUrlValue = '';
+        attachmentPreview.innerHTML = '';
+        const vid = document.createElement('video');
+        vid.src = url;
+        vid.controls = true;
+        vid.className = 'video-preview';
+        attachmentPreview.appendChild(vid);
+        const note = document.createElement('small');
+        note.className = 'hint';
+        note.textContent = 'Local preview only — to submit, please upload the video to postimages.org (or a host) and paste the video URL using the Upload Video (URL) button.';
+        attachmentPreview.appendChild(note);
+    });
+
+    // ========== AI Chat Widget JS (unchanged logic but kept here) ==========
+    const chatBtn = document.getElementById('aiChatBtn');
+    const chatBox = document.getElementById('aiChatBox');
+    const closeBtn = document.getElementById('aiCloseBtn');
+    const minBtn = document.getElementById('aiMinBtn');
+    const sendBtn = document.getElementById('aiSendBtn');
+    const input = document.getElementById('aiInput');
+    const messages = document.getElementById('aiMessages');
+    const imgUpload = document.getElementById('aiImageUpload');
+
+    // Message creation helper
+    function createMsgNode(text, sender = 'ai', isHTML = false) {
+        const node = document.createElement('div');
+        node.className = 'msg ' + (sender === 'user' ? 'user-msg' : 'ai-msg');
+        if (isHTML) node.innerHTML = text;
+        else node.textContent = text;
+        return node;
+    }
+
+    function addMessage(content, sender = 'ai', isHTML = false) {
+        const msg = createMsgNode(content, sender, isHTML);
+        messages.appendChild(msg);
+        messages.scrollTop = messages.scrollHeight;
+        return msg;
+    }
+
+    chatBtn.addEventListener('click', () => {
+        if (chatBox.style.display === 'flex') {
+            chatBox.style.display = 'none';
+            chatBox.setAttribute('aria-hidden', 'true');
+        } else {
+            chatBox.style.display = 'flex';
+            chatBox.setAttribute('aria-hidden', 'false');
+            input.focus();
+        }
+    });
+
+    closeBtn.addEventListener('click', () => {
+        chatBox.style.display = 'none';
+        chatBox.setAttribute('aria-hidden', 'true');
+    });
+
+    minBtn.addEventListener('click', () => {
+        if (!chatBox.classList.contains('minimized')) {
+            chatBox.classList.add('minimized');
+            messages.style.display = 'none';
+            document.getElementById('aiInputArea').style.display = 'none';
+        } else {
+            chatBox.classList.remove('minimized');
+            messages.style.display = 'flex';
+            document.getElementById('aiInputArea').style.display = 'flex';
+        }
+    });
+
+    let chatImageFile = null;
+    imgUpload.addEventListener('change', () => {
+        const file = imgUpload.files[0];
+        if (!file) return;
+        chatImageFile = file;
+        const reader = new FileReader();
+        reader.onload = function (ev) {
+            addMessage('You uploaded an image:', 'user');
+            addMessage('<img src="' + ev.target.result + '" alt="uploaded image">', 'user', true);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keypress', e => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    // sendMessage uses text/plain to your API (keeps original behavior)
+    async function sendMessage() {
+        const text = input.value.trim();
+        if (!text && !chatImageFile) return;
+
+        if (text) addMessage(text, 'user');
+        input.value = '';
+        input.focus();
+
+        const thinkingMsg = addMessage('Thinking...', 'ai');
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {'Content-Type': 'text/plain'},
+                body: text
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`${response.status}: ${errText}`);
+            }
+
+            const reply = await response.text();
+            thinkingMsg.textContent = reply || 'No response received.';
+        } catch (err) {
+            console.error('AI chat error:', err);
+            thinkingMsg.textContent = 'Error: ' + err.message;
+        } finally {
+            chatImageFile = null;
+            imgUpload.value = '';
+            messages.scrollTop = messages.scrollHeight;
+        }
+    }
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && chatBox.style.display === 'flex') {
+            chatBox.style.display = 'none';
+            chatBox.setAttribute('aria-hidden', 'true');
+        }
+    });
+
+    (function welcome() {
+        const n = document.createElement('div');
+        n.className = 'msg ai-msg';
+        n.textContent = 'AI Assistant ready — ask about products, vendors, or upload an image to analyze.';
+        messages.appendChild(n);
+    })();
+</script>
+
+</body>
+</html>
